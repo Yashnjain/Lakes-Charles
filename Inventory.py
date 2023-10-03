@@ -303,26 +303,28 @@ def in_out_inv(inv_path,inventory_wb,working_total_rw,check_sheet):
                 end_row = barge_inv.range(f'C'+ str(barge_inv.cells.last_cell.row)).end('up').row
                 end_row_main = inbound_inv.range(f'C'+ str(inbound_inv.cells.last_cell.row)).end('up').row
                 df = inbound_inv.range(f"A1:C{end_row_main}").options(pd.DataFrame,index=False).value
-                df2  = barge_inv.range(f"A1:C{end_row}").options(pd.DataFrame,index=False).value
-                merged_df = df.merge(df2, on=['Net Gallons inv report', 'Entry Date'], how='left')
-                df['Rail Car/Truck #'] = merged_df['Rail Car/Truck #1']
-
+                if len(df)>0:
+                    df2  = barge_inv.range(f"A1:C{end_row}").options(pd.DataFrame,index=False).value
+                    merged_df = df.merge(df2, on=['Net Gallons inv report', 'Entry Date'], how='left')
+                    df['Rail Car/Truck #'] = merged_df['Rail Car/Truck #1']
+                    inbound_inv.range(f"A2").options(headers=False,index=False,transpose=True).value = df['Rail Car/Truck #'].values
                 ###################################
-                inbound_inv.range(f"A2").options(headers=False,index=False,transpose=True).value = df['Rail Car/Truck #'].values
-                inbound_inv.range(f"F:F").number_format = 'General'
-                inbound_inv.range(f"F2").value = f"=VLOOKUP(A2,'MRN Detail'!A:B,2)"
-                inbound_inv.range(f"D:D").number_format = "0.00"
-                inbound_inv.range(f"D2").value = f"=VLOOKUP(A2,'MRN Detail'!A:AF,31)"
-                inbound_inv.range(f"E:E").number_format = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'
-                inbound_inv.range(f"E2").value = f"=B2-D2"
-                if not check:
+                if not check and inbound_inv.range(f"A2").value!=None:
+                    inbound_inv.range(f"F:F").number_format = 'General'
+                    inbound_inv.range(f"F2").value = f"=VLOOKUP(A2,'MRN Detail'!A:B,2)"
+                    inbound_inv.range(f"D:D").number_format = "0.00"
+                    inbound_inv.range(f"D2").value = f"=VLOOKUP(A2,'MRN Detail'!A:AF,31)"
+                    inbound_inv.range(f"E:E").number_format = '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)'
+                    inbound_inv.range(f"E2").value = f"=B2-D2"
+                else:    
                     inbound_inv.range(f"D2:F2").copy(inbound_inv.range(f"D2:F{end_row_main}"))
 
-                inbound_total_rw = end_row_main + 2
-                inbound_inv.range(f"B{inbound_total_rw}").value = f"=SUM(B2:B{end_row_main})"
-                insert_top1_btm2_borders(cellrange=f"B{inbound_total_rw}",working_sheet=inbound_inv,working_workbook=inventory_wb)  
-                inbound_inv.range(f"E{inbound_total_rw}").value = f"=SUM(E2:E{end_row_main})"
-                insert_top1_btm2_borders(cellrange=f"E{inbound_total_rw}",working_sheet=inbound_inv,working_workbook=inventory_wb) 
+                if inbound_inv.range(f"A2").value!=None:
+                    inbound_total_rw = end_row_main + 2
+                    inbound_inv.range(f"B{inbound_total_rw}").value = f"=SUM(B2:B{end_row_main})"
+                    insert_top1_btm2_borders(cellrange=f"B{inbound_total_rw}",working_sheet=inbound_inv,working_workbook=inventory_wb)  
+                    inbound_inv.range(f"E{inbound_total_rw}").value = f"=SUM(E2:E{end_row_main})"
+                    insert_top1_btm2_borders(cellrange=f"E{inbound_total_rw}",working_sheet=inbound_inv,working_workbook=inventory_wb) 
             else:
                 logging.info(f"No inbound reports found, please check ::: {inv_path}")
         except Exception as e:
@@ -334,11 +336,18 @@ def in_out_inv(inv_path,inventory_wb,working_total_rw,check_sheet):
         ############### updating summary tab ##################
         summary_inv = inventory_wb.sheets['Summary']
         summary_inv.activate()
-        summary_inv.range(f"B3").value =f"=+Inbound!B{inbound_total_rw}"
+        if inbound_inv.range(f"A2").value!=None:
+            summary_inv.range(f"B3").value =f"=+Inbound!B{inbound_total_rw}"
         summary_inv.range(f"B4").value =f"=-Outbound!E{outbound_total_rw}"
         
-        op_bal_df = pd.read_excel(pre_month_sheet,sheet_name="Summary",header=None)
-
+        try:
+            op_bal_df = pd.read_excel(pre_month_sheet,sheet_name="Summary",header=None)
+        except:
+            print("picking sheet from another location")
+            pre_month_sheet = r'J:\\India\\2023\\09-23\\Lake Charles Tank.xlsx'
+            print(f"location :::: {pre_month_sheet}")
+            op_bal_df = pd.read_excel(pre_month_sheet,sheet_name="Summary",header=None)
+            
         if op_bal_df.iloc[:, 0].str.contains('Ending Inventory').any():
             id_index = op_bal_df.iloc[:, 0].str.contains('Ending Inventory').tolist().index(True)
             previous_ending_bal = op_bal_df.iloc[:, 1][id_index]
@@ -350,11 +359,6 @@ def in_out_inv(inv_path,inventory_wb,working_total_rw,check_sheet):
         return inbound_file_name,outbound_file_name
     except Exception as e:
         raise e
-    finally:
-        try:
-            inventory_wb.app.quit()
-        except:
-            pass
 
 
 if __name__ == "__main__":
