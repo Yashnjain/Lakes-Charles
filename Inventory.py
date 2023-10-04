@@ -383,7 +383,7 @@ if __name__ == "__main__":
 
         locations_list = []
         # logging.info('setting paTH TO download')
-        receiver_email = "yashn.jain@biourja.com"
+        receiver_email = "yashn.jain@biourja.com,imam.khan@biourja.com,anushka.chouhan@biourja.com,yash.gupta@biourja.com,bhavana.kaurav@biourja.com,rini.gohil@biourja.com"
         # receiver_email = "yashn.jain@biourja.com,imam.khan@biourja.com,apoorva.kansara@biourja.com, accounts@biourja.com, rini.gohil@biourja.com,itdevsupport@biourja.com"
 
 
