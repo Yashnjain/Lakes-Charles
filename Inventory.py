@@ -344,7 +344,7 @@ def in_out_inv(inv_path,inventory_wb,working_total_rw,check_sheet):
             op_bal_df = pd.read_excel(pre_month_sheet,sheet_name="Summary",header=None)
         except:
             print("picking sheet from another location")
-            pre_month_sheet = r'J:\\India\\2023\\09-23\\Lake Charles Tank.xlsx'
+            pre_month_sheet = r'J:\India\2023\09-23\Transfered\Lake Charles Tank.xlsx'
             print(f"location :::: {pre_month_sheet}")
             op_bal_df = pd.read_excel(pre_month_sheet,sheet_name="Summary",header=None)
             
@@ -490,21 +490,22 @@ if __name__ == "__main__":
         try:
             inventory_wb.save(f"{output_location}\\Lake Charles Tank.xlsx")
             print(f"inventory done and saved in {output_location}")
-            inventory_wb.app.kill()
+            wb_name = inventory_wb.name
+            inventory_wb.app.quit()
         except Exception as e:
             logging.info(f"could not save or kill ::: {output_location}")
             raise e 
 
 
 
-
+        time.sleep(2)
         remove_existing_files(inv_path)
         logging.info(f"files succesfully removed from folder :::: {inv_path}")
         locations_list.append(logfile)
         locations_list.append(f"{output_location}\\Lake Charles Tank.xlsx")
         nl = '<br>'
         body = ''
-        body = (f'{nl}<strong>{inventory_wb.name}</strong> {nl}{nl} <strong>{inventory_wb.name}</strong> successfully created from reports <strong>{inbound_file_name},{outbound_file_name}</strong>, {nl} Attached path for the excel=<u>{output_location}</u>{nl}')
+        body = (f'{nl}<strong>{wb_name}</strong> {nl}{nl} <strong>{wb_name}</strong> successfully created from reports <strong>{inbound_file_name},{outbound_file_name}</strong>, {nl} Attached path for the excel=<u>{output_location}</u>{nl}')
         bu_alerts.send_mail(receiver_email = receiver_email,mail_subject =f'JOB SUCCESS - {job_name}',mail_body = f'{body}{job_name} completed successfully, Attached Logs and Excel',multiple_attachment_list = locations_list)
         logging.info("Process completed")
         print("process completed")
@@ -512,7 +513,7 @@ if __name__ == "__main__":
     except Exception as e:
         logging.exception(str(e))
         try:
-            inventory_wb.app.kill()
+            inventory_wb.app.quit()
         except:
             pass    
         bu_alerts.send_mail(receiver_email = receiver_email,mail_subject =f'JOB FAILED -{job_name}',mail_body = f'{job_name} failed in __main__, Attached logs',attachment_location = logfile)
