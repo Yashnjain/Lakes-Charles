@@ -386,7 +386,7 @@ if __name__ == "__main__":
         receiver_email = "yashn.jain@biourja.com,imam.khan@biourja.com,anushka.chouhan@biourja.com,yash.gupta@biourja.com,bhavana.kaurav@biourja.com,rini.gohil@biourja.com"
         # receiver_email = "yashn.jain@biourja.com,imam.khan@biourja.com,apoorva.kansara@biourja.com, accounts@biourja.com, rini.gohil@biourja.com,itdevsupport@biourja.com"
 
-
+        job_name = "BIO-PAD01_" + job_name
         time_start=time.time()
         today_date=date.today()
         inv_path = r'J:\India\Inv Rpt\IT_INVENTORY\flows\Lake Charles'
