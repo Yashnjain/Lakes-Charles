@@ -481,7 +481,7 @@ if __name__ == "__main__":
         except Exception as e:
             logging.info(f"Inbound/Outbound Tab Failure : {e}")
             raise e        
-        print("Done")
+        print("process Done")
         
         output_location = rf'J:\India\Inv Rpt\IT_INVENTORY\Output\{year}\{date_fldr}\Lakes Charles'
         if not os.path.exists(output_location):
@@ -495,8 +495,6 @@ if __name__ == "__main__":
         except Exception as e:
             logging.info(f"could not save or kill ::: {output_location}")
             raise e 
-
-
 
         time.sleep(2)
         remove_existing_files(inv_path)
